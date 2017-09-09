@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)https://hpneo.github.io/gmaps/examples/interacting.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">.gm-style .gm-style-mtc label,.gm-style .gm-style-mtc div{font-weight:400}
+</style><link type="text/css" rel="stylesheet" href="./interacting_files/css"><style type="text/css">.gm-style .gm-style-cc span,.gm-style .gm-style-cc a,.gm-style .gm-style-mtc div{font-size:10px}
+</style><style type="text/css">@media print {  .gm-style .gmnoprint, .gmnoprint {    display:none  }}@media screen {  .gm-style .gmnoscreen, .gmnoscreen {    display:none  }}</style><style type="text/css">.gm-style-pbc{transition:opacity ease-in-out;background-color:rgba(0,0,0,0.45);text-align:center}.gm-style-pbt{font-size:22px;color:white;font-family:Roboto,Arial,sans-serif;position:relative;margin:0;top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%)}
+</style>
+  <title>gmaps.js — the easiest way to use Google Maps</title>
+  <script type="text/javascript" src="./interacting_files/jquery.min.js" style=""></script>
+  <script type="text/javascript" src="./interacting_files/js"></script>
+  <script type="text/javascript" src="./interacting_files/gmaps.js"></script>
+  <script type="text/javascript" src="./interacting_files/prettify.js"></script>
+  <link href="./interacting_files/css(1)" rel="stylesheet" type="text/css">
+  <link href="./interacting_files/styles.css" rel="stylesheet" type="text/css">
+  <link href="./interacting_files/prettify.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" type="text/css" href="./interacting_files/examples.css">
+  <script type="text/javascript">
+    var map;
+
+    // Update position
+    $(document).on('submit', '.edit_marker', function(e) {
+      e.preventDefault();
+
+      var $index = $(this).data('marker-index');
+
+      $lat = $('#marker_' + $index + '_lat').val();
+      $lng = $('#marker_' + $index + '_lng').val();
+
+      var template = $('#edit_marker_template').text();
+
+      // Update form values
+      var content = template.replace(/{{index}}/g, $index).replace(/{{lat}}/g, $lat).replace(/{{lng}}/g, $lng);
+
+      map.markers[$index].setPosition(new google.maps.LatLng($lat, $lng));
+      map.markers[$index].infoWindow.setContent(content);
+
+      $marker = $('#markers-with-coordinates').find('li').eq(0).find('a');
+      $marker.data('marker-lat', $lat);
+      $marker.data('marker-lng', $lng);
+    });
+
+    // Update center
+    $(document).on('click', '.pan-to-marker', function(e) {
+      e.preventDefault();
+
+      var lat, lng;
+
+      var $index = $(this).data('marker-index');
+      var $lat = $(this).data('marker-lat');
+      var $lng = $(this).data('marker-lng');
+
+      if ($index != undefined) {
+        // using indices
+        var position = map.markers[$index].getPosition();
+        lat = position.lat();
+        lng = position.lng();
+      }
+      else {
+        // using coordinates
+        lat = $lat;
+        lng = $lng;
+      }
+
+      map.setCenter(lat, lng);
+    });
+
+    $(document).ready(function(){
+      prettyPrint();
+      map = new GMaps({
+        div: '#map',
+        lat: -12.043333,
+        lng: -77.028333
+      });
+
+      GMaps.on('marker_added', map, function(marker) {
+        $('#markers-with-index').append('<li><a href="#" class="pan-to-marker" data-marker-index="' + map.markers.indexOf(marker) + '">' + marker.title + '</a></li>');
+
+        $('#markers-with-coordinates').append('<li><a href="#" class="pan-to-marker" data-marker-lat="' + marker.getPosition().lat() + '" data-marker-lng="' + marker.getPosition().lng() + '">' + marker.title + '</a></li>');
+      });
+
+      GMaps.on('click', map.map, function(event) {
+        var index = map.markers.length;
+        var lat = event.latLng.lat();
+        var lng = event.latLng.lng();
+
+        var template = $('#edit_marker_template').text();
+
+        var content = template.replace(/{{index}}/g, index).replace(/{{lat}}/g, lat).replace(/{{lng}}/g, lng);
+
+        map.addMarker({
+          lat: lat,
+          lng: lng,
+          title: 'Marker #' + index,
+          infoWindow: {
+            content : content
+          }
+        });
+      });
+    });
+  </script>
+<script type="text/javascript" charset="UTF-8" src="./interacting_files/common.js"></script><script type="text/javascript" charset="UTF-8" src="./interacting_files/map.js"></script><style type="text/css">.gm-style {
+        font: 400 11px Roboto, Arial, sans-serif;
+        text-decoration: none;
+      }
+      .gm-style img { max-width: none; }</style><script type="text/javascript" charset="UTF-8" src="./interacting_files/onion.js"></script><script type="text/javascript" charset="UTF-8" src="./interacting_files/controls.js"></script><script type="text/javascript" charset="UTF-8" src="./interacting_files/util.js"></script><script type="text/javascript" charset="UTF-8" src="./interacting_files/marker.js"></script><script type="text/javascript" charset="UTF-8" src="./interacting_files/stats.js"></script></head>
+<body>
+  <div id="header">
+    <h1>
+      <a href="https://hpneo.github.io/gmaps/">gmaps.js</a>
+    </h1>
+    <h2>Google Maps API with less pain and more fun</h2>
+  </div>
+  <div id="body">
+    <h3>Interacting with UI</h3>
+    <div class="row">
+      <div class="span11">
+        <div class="popin">
+          <div id="map" style="position: relative; overflow: hidden;"><div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);"><div class="gm-style" style="position: absolute; z-index: 0; left: 0px; top: 0px; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px;"><div tabindex="0" style="position: absolute; z-index: 0; left: 0px; top: 0px; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; cursor: url(&quot;https://maps.gstatic.com/mapfiles/openhand_8_8.cur&quot;) 8 8, default;"><div style="z-index: 1; position: absolute; top: 0px; left: 0px; width: 100%; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"><div style="position: absolute; left: 0px; top: 0px; z-index: 100; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="width: 256px; height: 256px; position: absolute; left: 123px; top: -202px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 123px; top: 54px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -133px; top: -202px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -133px; top: 54px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 379px; top: -202px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 379px; top: 54px;"></div></div></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 101; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 102; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 103; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: -1;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 123px; top: -202px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 123px; top: 54px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -133px; top: -202px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -133px; top: 54px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 379px; top: -202px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 379px; top: 54px;"></div></div></div></div><div style="position: absolute; z-index: 0; left: 0px; top: 0px;"><div style="overflow: hidden; width: 610px; height: 300px;"><img src="./interacting_files/StaticMapService.GetMapImage" style="width: 610px; height: 300px;"></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="position: absolute; left: 123px; top: -202px; transition: opacity 200ms ease-out;"><img src="./interacting_files/vt" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 123px; top: 54px; transition: opacity 200ms ease-out;"><img src="./interacting_files/vt(1)" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -133px; top: -202px; transition: opacity 200ms ease-out;"><img src="./interacting_files/vt(2)" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -133px; top: 54px; transition: opacity 200ms ease-out;"><img src="./interacting_files/vt(3)" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 379px; top: -202px; transition: opacity 200ms ease-out;"><img src="./interacting_files/vt(4)" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 379px; top: 54px; transition: opacity 200ms ease-out;"><img src="./interacting_files/vt(5)" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div></div><div class="gm-style-pbc" style="z-index: 2; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px; opacity: 0;"><p class="gm-style-pbt"></p></div><div style="z-index: 3; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px;"><div style="z-index: 1; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px;"></div></div><div style="z-index: 4; position: absolute; top: 0px; left: 0px; width: 100%; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"><div style="position: absolute; left: 0px; top: 0px; z-index: 104; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 105; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 106; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 107; width: 100%;"></div></div></div><div style="margin-left: 5px; margin-right: 5px; z-index: 1000000; position: absolute; left: 0px; bottom: 0px;"><a target="_blank" href="https://maps.google.com/maps?ll=-12.043333,-77.028333&amp;z=15&amp;t=m&amp;hl=en-US&amp;gl=US&amp;mapclient=apiv3" title="Click to see this area on Google Maps" style="position: static; overflow: visible; float: none; display: inline;"><div style="width: 66px; height: 26px; cursor: pointer;"><img src="./interacting_files/google4.png" draggable="false" style="position: absolute; left: 0px; top: 0px; width: 66px; height: 26px; user-select: none; border: 0px; padding: 0px; margin: 0px;"></div></a></div><div style="background-color: white; padding: 15px 21px; border: 1px solid rgb(171, 171, 171); font-family: Roboto, Arial, sans-serif; color: rgb(34, 34, 34); box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 16px; z-index: 10000002; display: none; width: 256px; height: 148px; position: absolute; left: 155px; top: 60px;"><div style="padding: 0px 0px 10px; font-size: 16px;">Map Data</div><div style="font-size: 13px;">Map data ©2017 Google</div><div style="width: 13px; height: 13px; overflow: hidden; position: absolute; opacity: 0.7; right: 12px; top: 12px; z-index: 10000; cursor: pointer;"><img src="./interacting_files/mapcnt6.png" draggable="false" style="position: absolute; left: -2px; top: -336px; width: 59px; height: 492px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div><div class="gmnoprint" style="z-index: 1000001; position: absolute; right: 256px; bottom: 0px; width: 121px;"><div draggable="false" class="gm-style-cc" style="user-select: none; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a style="color: rgb(68, 68, 68); text-decoration: none; cursor: pointer; display: none;">Map Data</a><span style="">Map data ©2017 Google</span></div></div></div><div class="gmnoscreen" style="position: absolute; right: 0px; bottom: 0px;"><div style="font-family: Roboto, Arial, sans-serif; font-size: 11px; color: rgb(68, 68, 68); direction: ltr; text-align: right; background-color: rgb(245, 245, 245);">Map data ©2017 Google</div></div><div class="gmnoprint gm-style-cc" draggable="false" style="z-index: 1000001; user-select: none; height: 14px; line-height: 14px; position: absolute; right: 95px; bottom: 0px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a href="https://www.google.com/intl/en-US_US/help/terms_maps.html" target="_blank" style="text-decoration: none; cursor: pointer; color: rgb(68, 68, 68);">Terms of Use</a></div></div><div style="cursor: pointer; width: 25px; height: 25px; overflow: hidden; margin: 10px 14px; position: absolute; top: 0px; right: 0px;"><img src="./interacting_files/sv9.png" draggable="false" class="gm-fullscreen-control" style="position: absolute; left: -52px; top: -86px; width: 164px; height: 175px; user-select: none; border: 0px; padding: 0px; margin: 0px;"></div><div draggable="false" class="gm-style-cc" style="user-select: none; height: 14px; line-height: 14px; position: absolute; right: 0px; bottom: 0px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a target="_new" title="Report errors in the road map or imagery to Google" href="https://www.google.com/maps/@-12.043333,-77.028333,15z/data=!10m1!1e1!12b1?source=apiv3&amp;rapsrc=apiv3" style="font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); text-decoration: none; position: relative;">Report a map error</a></div></div><div class="gmnoprint gm-bundled-control" draggable="false" controlwidth="28" controlheight="55" style="margin: 10px; user-select: none; position: absolute; left: 0px; top: 0px;"><div class="gmnoprint" controlwidth="28" controlheight="55" style="position: absolute; left: 0px; top: 0px;"><div draggable="false" style="user-select: none; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-radius: 2px; cursor: pointer; background-color: rgb(255, 255, 255); width: 28px; height: 55px;"><div title="Zoom in" aria-label="Zoom in" tabindex="0" style="position: relative; width: 28px; height: 27px; left: 0px; top: 0px;"><div style="overflow: hidden; position: absolute; width: 15px; height: 15px; left: 7px; top: 6px;"><img src="./interacting_files/tmapctrl.png" draggable="false" style="position: absolute; left: 0px; top: 0px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 120px; height: 54px;"></div></div><div style="position: relative; overflow: hidden; width: 67%; height: 1px; left: 16%; background-color: rgb(230, 230, 230); top: 0px;"></div><div title="Zoom out" aria-label="Zoom out" tabindex="0" style="position: relative; width: 28px; height: 27px; left: 0px; top: 0px;"><div style="overflow: hidden; position: absolute; width: 15px; height: 15px; left: 7px; top: 6px;"><img src="./interacting_files/tmapctrl.png" draggable="false" style="position: absolute; left: 0px; top: -15px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 120px; height: 54px;"></div></div></div></div></div><div class="gmnoprint gm-bundled-control gm-bundled-control-on-bottom" draggable="false" controlwidth="28" controlheight="28" style="margin: 10px; user-select: none; position: absolute; bottom: 42px; right: 28px;"><div class="gm-svpc" controlwidth="28" controlheight="28" style="background-color: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-radius: 2px; width: 28px; height: 28px; cursor: url(&quot;https://maps.gstatic.com/mapfiles/openhand_8_8.cur&quot;) 8 8, default; position: absolute; left: 0px; top: 0px;"><div style="position: absolute; left: 1px; top: 1px;"></div><div style="position: absolute; left: 1px; top: 1px;"><div aria-label="Street View Pegman Control" style="width: 26px; height: 26px; overflow: hidden; position: absolute; left: 0px; top: 0px;"><img src="./interacting_files/cb_scout5.png" draggable="false" style="position: absolute; left: -147px; top: -26px; width: 215px; height: 835px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div aria-label="Pegman is on top of the Map" style="width: 26px; height: 26px; overflow: hidden; position: absolute; left: 0px; top: 0px; visibility: hidden;"><img src="./interacting_files/cb_scout5.png" draggable="false" style="position: absolute; left: -147px; top: -52px; width: 215px; height: 835px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div aria-label="Street View Pegman Control" style="width: 26px; height: 26px; overflow: hidden; position: absolute; left: 0px; top: 0px; visibility: hidden;"><img src="./interacting_files/cb_scout5.png" draggable="false" style="position: absolute; left: -147px; top: -78px; width: 215px; height: 835px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div><div class="gmnoprint" controlwidth="28" controlheight="0" style="display: none; position: absolute;"><div title="Rotate map 90 degrees" style="width: 28px; height: 28px; overflow: hidden; position: absolute; border-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; cursor: pointer; background-color: rgb(255, 255, 255); display: none;"><img src="./interacting_files/tmapctrl4.png" draggable="false" style="position: absolute; left: -141px; top: 6px; width: 170px; height: 54px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div class="gm-tilt" style="width: 28px; height: 28px; overflow: hidden; position: absolute; border-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; top: 0px; cursor: pointer; background-color: rgb(255, 255, 255);"><img src="./interacting_files/tmapctrl4.png" draggable="false" style="position: absolute; left: -141px; top: -13px; width: 170px; height: 54px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div><div class="gmnoprint" style="margin: 10px; z-index: 0; position: absolute; cursor: pointer; left: 48px; top: 0px;"><div class="gm-style-mtc" style="float: left;"><div draggable="false" title="Show street map" style="direction: ltr; overflow: hidden; text-align: center; position: relative; color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 8px; border-bottom-left-radius: 2px; border-top-left-radius: 2px; -webkit-background-clip: padding-box; background-clip: padding-box; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; min-width: 21px; font-weight: 500;">Map</div><div style="background-color: white; z-index: -1; padding: 2px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; position: absolute; left: 0px; top: 29px; text-align: left; display: none;"><div draggable="false" title="Show street map with terrain" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 6px 8px 6px 6px; direction: ltr; text-align: left; white-space: nowrap;"><span role="checkbox" style="box-sizing: border-box; position: relative; line-height: 0; font-size: 0px; margin: 0px 5px 0px 0px; display: inline-block; background-color: rgb(255, 255, 255); border: 1px solid rgb(198, 198, 198); border-radius: 1px; width: 13px; height: 13px; vertical-align: middle;"><div style="position: absolute; left: 1px; top: -2px; width: 13px; height: 11px; overflow: hidden; display: none;"><img src="./interacting_files/imgs8.png" draggable="false" style="position: absolute; left: -52px; top: -44px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 68px; height: 67px;"></div></span><label style="vertical-align: middle; cursor: pointer;">Terrain</label></div></div></div><div class="gm-style-mtc" style="float: left;"><div draggable="false" title="Show satellite imagery" style="direction: ltr; overflow: hidden; text-align: center; position: relative; color: rgb(86, 86, 86); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 8px; border-bottom-right-radius: 2px; border-top-right-radius: 2px; -webkit-background-clip: padding-box; background-clip: padding-box; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-left: 0px; min-width: 39px;">Satellite</div><div style="background-color: white; z-index: -1; padding: 2px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; position: absolute; right: 0px; top: 29px; text-align: left; display: none;"><div draggable="false" title="Show imagery with street names" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 6px 8px 6px 6px; direction: ltr; text-align: left; white-space: nowrap;"><span role="checkbox" style="box-sizing: border-box; position: relative; line-height: 0; font-size: 0px; margin: 0px 5px 0px 0px; display: inline-block; background-color: rgb(255, 255, 255); border: 1px solid rgb(198, 198, 198); border-radius: 1px; width: 13px; height: 13px; vertical-align: middle;"><div style="position: absolute; left: 1px; top: -2px; width: 13px; height: 11px; overflow: hidden;"><img src="./interacting_files/imgs8.png" draggable="false" style="position: absolute; left: -52px; top: -44px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 68px; height: 67px;"></div></span><label style="vertical-align: middle; cursor: pointer;">Labels</label></div></div></div></div><div draggable="false" class="gm-style-cc" style="position: absolute; user-select: none; height: 14px; line-height: 14px; right: 166px; bottom: 0px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><span>200 m&nbsp;</span><div style="position: relative; display: inline-block; height: 8px; bottom: -1px; width: 47px;"><div style="width: 100%; height: 4px; position: absolute; left: 0px; top: 0px;"></div><div style="width: 4px; height: 8px; left: 0px; top: 0px; background-color: rgb(255, 255, 255);"></div><div style="width: 4px; height: 8px; position: absolute; background-color: rgb(255, 255, 255); right: 0px; bottom: 0px;"></div><div style="position: absolute; background-color: rgb(102, 102, 102); height: 2px; left: 1px; bottom: 1px; right: 1px;"></div><div style="position: absolute; width: 2px; height: 6px; left: 1px; top: 1px; background-color: rgb(102, 102, 102);"></div><div style="width: 2px; height: 6px; position: absolute; background-color: rgb(102, 102, 102); bottom: 1px; right: 1px;"></div></div></div></div></div></div></div>
+        </div>
+      </div>
+      <div class="span3">
+        <h3>Using indices</h3>
+        <ul id="markers-with-index">
+        </ul>
+      </div>
+      <div class="span3">
+        <h3>Using coordinates</h3>
+        <ul id="markers-with-coordinates">
+        </ul>
+      </div>
+    </div>
+    <h3>Code</h3>
+    <div class="row">
+      <div class="span17">
+        <pre class="prettyprint"><span class="kwd">var</span><span class="pln"> map</span><span class="pun">;</span><span class="pln">
+
+</span><span class="com">// Update position</span><span class="pln">
+$</span><span class="pun">(</span><span class="pln">document</span><span class="pun">).</span><span class="pln">on</span><span class="pun">(</span><span class="str">'submit'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'.edit_marker'</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">e</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+  e</span><span class="pun">.</span><span class="pln">preventDefault</span><span class="pun">();</span><span class="pln">
+
+  </span><span class="kwd">var</span><span class="pln"> $index </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="kwd">this</span><span class="pun">).</span><span class="pln">data</span><span class="pun">(</span><span class="str">'marker-index'</span><span class="pun">);</span><span class="pln">
+
+  $lat </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="str">'#marker_'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> $index </span><span class="pun">+</span><span class="pln"> </span><span class="str">'_lat'</span><span class="pun">).</span><span class="pln">val</span><span class="pun">();</span><span class="pln">
+  $lng </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="str">'#marker_'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> $index </span><span class="pun">+</span><span class="pln"> </span><span class="str">'_lng'</span><span class="pun">).</span><span class="pln">val</span><span class="pun">();</span><span class="pln">
+
+  </span><span class="kwd">var</span><span class="pln"> </span><span class="kwd">template</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="str">'#edit_marker_template'</span><span class="pun">).</span><span class="pln">text</span><span class="pun">();</span><span class="pln">
+
+  </span><span class="com">// Update form values</span><span class="pln">
+  </span><span class="kwd">var</span><span class="pln"> content </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">template</span><span class="pun">.</span><span class="pln">replace</span><span class="pun">(</span><span class="str">/{{index}}/</span><span class="pln">g</span><span class="pun">,</span><span class="pln"> $index</span><span class="pun">).</span><span class="pln">replace</span><span class="pun">(</span><span class="str">/{{lat}}/</span><span class="pln">g</span><span class="pun">,</span><span class="pln"> $lat</span><span class="pun">).</span><span class="pln">replace</span><span class="pun">(</span><span class="str">/{{lng}}/</span><span class="pln">g</span><span class="pun">,</span><span class="pln"> $lng</span><span class="pun">);</span><span class="pln">
+
+  map</span><span class="pun">.</span><span class="pln">markers</span><span class="pun">[</span><span class="pln">$index</span><span class="pun">].</span><span class="pln">setPosition</span><span class="pun">(</span><span class="kwd">new</span><span class="pln"> google</span><span class="pun">.</span><span class="pln">maps</span><span class="pun">.</span><span class="typ">LatLng</span><span class="pun">(</span><span class="pln">$lat</span><span class="pun">,</span><span class="pln"> $lng</span><span class="pun">));</span><span class="pln">
+  map</span><span class="pun">.</span><span class="pln">markers</span><span class="pun">[</span><span class="pln">$index</span><span class="pun">].</span><span class="pln">infoWindow</span><span class="pun">.</span><span class="pln">setContent</span><span class="pun">(</span><span class="pln">content</span><span class="pun">);</span><span class="pln">
+
+  $marker </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="str">'#markers-with-coordinates'</span><span class="pun">).</span><span class="pln">find</span><span class="pun">(</span><span class="str">'li'</span><span class="pun">).</span><span class="pln">eq</span><span class="pun">(</span><span class="lit">0</span><span class="pun">).</span><span class="pln">find</span><span class="pun">(</span><span class="str">'a'</span><span class="pun">);</span><span class="pln">
+  $marker</span><span class="pun">.</span><span class="pln">data</span><span class="pun">(</span><span class="str">'marker-lat'</span><span class="pun">,</span><span class="pln"> $lat</span><span class="pun">);</span><span class="pln">
+  $marker</span><span class="pun">.</span><span class="pln">data</span><span class="pun">(</span><span class="str">'marker-lng'</span><span class="pun">,</span><span class="pln"> $lng</span><span class="pun">);</span><span class="pln">
+</span><span class="pun">});</span><span class="pln">
+
+</span><span class="com">// Update center</span><span class="pln">
+$</span><span class="pun">(</span><span class="pln">document</span><span class="pun">).</span><span class="pln">on</span><span class="pun">(</span><span class="str">'click'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'.pan-to-marker'</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">e</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+  e</span><span class="pun">.</span><span class="pln">preventDefault</span><span class="pun">();</span><span class="pln">
+
+  </span><span class="kwd">var</span><span class="pln"> lat</span><span class="pun">,</span><span class="pln"> lng</span><span class="pun">;</span><span class="pln">
+
+  </span><span class="kwd">var</span><span class="pln"> $index </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="kwd">this</span><span class="pun">).</span><span class="pln">data</span><span class="pun">(</span><span class="str">'marker-index'</span><span class="pun">);</span><span class="pln">
+  </span><span class="kwd">var</span><span class="pln"> $lat </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="kwd">this</span><span class="pun">).</span><span class="pln">data</span><span class="pun">(</span><span class="str">'marker-lat'</span><span class="pun">);</span><span class="pln">
+  </span><span class="kwd">var</span><span class="pln"> $lng </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="kwd">this</span><span class="pun">).</span><span class="pln">data</span><span class="pun">(</span><span class="str">'marker-lng'</span><span class="pun">);</span><span class="pln">
+
+  </span><span class="kwd">if</span><span class="pln"> </span><span class="pun">(</span><span class="pln">$index </span><span class="pun">!=</span><span class="pln"> </span><span class="kwd">undefined</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    </span><span class="com">// using indices</span><span class="pln">
+    </span><span class="kwd">var</span><span class="pln"> position </span><span class="pun">=</span><span class="pln"> map</span><span class="pun">.</span><span class="pln">markers</span><span class="pun">[</span><span class="pln">$index</span><span class="pun">].</span><span class="pln">getPosition</span><span class="pun">();</span><span class="pln">
+    lat </span><span class="pun">=</span><span class="pln"> position</span><span class="pun">.</span><span class="pln">lat</span><span class="pun">();</span><span class="pln">
+    lng </span><span class="pun">=</span><span class="pln"> position</span><span class="pun">.</span><span class="pln">lng</span><span class="pun">();</span><span class="pln">
+  </span><span class="pun">}</span><span class="pln">
+  </span><span class="kwd">else</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    </span><span class="com">// using coordinates</span><span class="pln">
+    lat </span><span class="pun">=</span><span class="pln"> $lat</span><span class="pun">;</span><span class="pln">
+    lng </span><span class="pun">=</span><span class="pln"> $lng</span><span class="pun">;</span><span class="pln">
+  </span><span class="pun">}</span><span class="pln">
+
+  map</span><span class="pun">.</span><span class="pln">setCenter</span><span class="pun">(</span><span class="pln">lat</span><span class="pun">,</span><span class="pln"> lng</span><span class="pun">);</span><span class="pln">
+</span><span class="pun">});</span><span class="pln">
+
+$</span><span class="pun">(</span><span class="pln">document</span><span class="pun">).</span><span class="pln">ready</span><span class="pun">(</span><span class="kwd">function</span><span class="pun">(){</span><span class="pln">
+  prettyPrint</span><span class="pun">();</span><span class="pln">
+  map </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">GMaps</span><span class="pun">({</span><span class="pln">
+    div</span><span class="pun">:</span><span class="pln"> </span><span class="str">'#map'</span><span class="pun">,</span><span class="pln">
+    lat</span><span class="pun">:</span><span class="pln"> </span><span class="pun">-</span><span class="lit">12.043333</span><span class="pun">,</span><span class="pln">
+    lng</span><span class="pun">:</span><span class="pln"> </span><span class="pun">-</span><span class="lit">77.028333</span><span class="pln">
+  </span><span class="pun">});</span><span class="pln">
+
+  </span><span class="typ">GMaps</span><span class="pun">.</span><span class="pln">on</span><span class="pun">(</span><span class="str">'marker_added'</span><span class="pun">,</span><span class="pln"> map</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">marker</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    $</span><span class="pun">(</span><span class="str">'#markers-with-index'</span><span class="pun">).</span><span class="pln">append</span><span class="pun">(</span><span class="str">'&lt;li&gt;&lt;a href="#" class="pan-to-marker" data-marker-index="'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> map</span><span class="pun">.</span><span class="pln">markers</span><span class="pun">.</span><span class="pln">indexOf</span><span class="pun">(</span><span class="pln">marker</span><span class="pun">)</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> </span><span class="str">'"&gt;'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> marker</span><span class="pun">.</span><span class="pln">title </span><span class="pun">+</span><span class="pln"> </span><span class="str">'&lt;/a&gt;&lt;/li&gt;'</span><span class="pun">);</span><span class="pln">
+
+    $</span><span class="pun">(</span><span class="str">'#markers-with-coordinates'</span><span class="pun">).</span><span class="pln">append</span><span class="pun">(</span><span class="str">'&lt;li&gt;&lt;a href="#" class="pan-to-marker" data-marker-lat="'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> marker</span><span class="pun">.</span><span class="pln">getPosition</span><span class="pun">().</span><span class="pln">lat</span><span class="pun">()</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> </span><span class="str">'" data-marker-lng="'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> marker</span><span class="pun">.</span><span class="pln">getPosition</span><span class="pun">().</span><span class="pln">lng</span><span class="pun">()</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> </span><span class="str">'"&gt;'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> marker</span><span class="pun">.</span><span class="pln">title </span><span class="pun">+</span><span class="pln"> </span><span class="str">'&lt;/a&gt;&lt;/li&gt;'</span><span class="pun">);</span><span class="pln">
+  </span><span class="pun">});</span><span class="pln">
+
+  </span><span class="typ">GMaps</span><span class="pun">.</span><span class="pln">on</span><span class="pun">(</span><span class="str">'click'</span><span class="pun">,</span><span class="pln"> map</span><span class="pun">.</span><span class="pln">map</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="kwd">event</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    </span><span class="kwd">var</span><span class="pln"> index </span><span class="pun">=</span><span class="pln"> map</span><span class="pun">.</span><span class="pln">markers</span><span class="pun">.</span><span class="pln">length</span><span class="pun">;</span><span class="pln">
+    </span><span class="kwd">var</span><span class="pln"> lat </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">event</span><span class="pun">.</span><span class="pln">latLng</span><span class="pun">.</span><span class="pln">lat</span><span class="pun">();</span><span class="pln">
+    </span><span class="kwd">var</span><span class="pln"> lng </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">event</span><span class="pun">.</span><span class="pln">latLng</span><span class="pun">.</span><span class="pln">lng</span><span class="pun">();</span><span class="pln">
+
+    </span><span class="kwd">var</span><span class="pln"> </span><span class="kwd">template</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> $</span><span class="pun">(</span><span class="str">'#edit_marker_template'</span><span class="pun">).</span><span class="pln">text</span><span class="pun">();</span><span class="pln">
+
+    </span><span class="kwd">var</span><span class="pln"> content </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">template</span><span class="pun">.</span><span class="pln">replace</span><span class="pun">(</span><span class="str">/{{index}}/</span><span class="pln">g</span><span class="pun">,</span><span class="pln"> index</span><span class="pun">).</span><span class="pln">replace</span><span class="pun">(</span><span class="str">/{{lat}}/</span><span class="pln">g</span><span class="pun">,</span><span class="pln"> lat</span><span class="pun">).</span><span class="pln">replace</span><span class="pun">(</span><span class="str">/{{lng}}/</span><span class="pln">g</span><span class="pun">,</span><span class="pln"> lng</span><span class="pun">);</span><span class="pln">
+
+    map</span><span class="pun">.</span><span class="pln">addMarker</span><span class="pun">({</span><span class="pln">
+      lat</span><span class="pun">:</span><span class="pln"> lat</span><span class="pun">,</span><span class="pln">
+      lng</span><span class="pun">:</span><span class="pln"> lng</span><span class="pun">,</span><span class="pln">
+      title</span><span class="pun">:</span><span class="pln"> </span><span class="str">'Marker #'</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> index</span><span class="pun">,</span><span class="pln">
+      infoWindow</span><span class="pun">:</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+        content </span><span class="pun">:</span><span class="pln"> content
+      </span><span class="pun">}</span><span class="pln">
+    </span><span class="pun">});</span><span class="pln">
+  </span><span class="pun">});</span><span class="pln">
+</span><span class="pun">});</span><span class="pln">
+        </span></pre>
+      </div>
+    </div>
+    <h3>Template: #edit_marker_template</h3>
+    <div class="row">
+      <div class="span17">
+        <pre class="prettyprint"><span class="tag">&lt;h4&gt;</span><span class="pln">Edit Marker</span><span class="tag">&lt;/h4&gt;</span><span class="pln">
+</span><span class="tag">&lt;form</span><span class="pln"> </span><span class="atn">class</span><span class="pun">=</span><span class="atv">"edit_marker"</span><span class="pln"> </span><span class="atn">action</span><span class="pun">=</span><span class="atv">"#"</span><span class="pln"> </span><span class="atn">method</span><span class="pun">=</span><span class="atv">"post"</span><span class="pln"> </span><span class="atn">data-marker-index</span><span class="pun">=</span><span class="atv">"{{index}}"</span><span class="tag">&gt;</span><span class="pln">
+  </span><span class="tag">&lt;p&gt;</span><span class="pln">
+    </span><span class="tag">&lt;label</span><span class="pln"> </span><span class="atn">for</span><span class="pun">=</span><span class="atv">"marker_{{index}}_lat"</span><span class="tag">&gt;</span><span class="pln">Latitude:</span><span class="tag">&lt;/label&gt;</span><span class="pln">
+    </span><span class="tag">&lt;input</span><span class="pln"> </span><span class="atn">type</span><span class="pun">=</span><span class="atv">"text"</span><span class="pln"> </span><span class="atn">id</span><span class="pun">=</span><span class="atv">"marker_{{index}}_lat"</span><span class="pln"> </span><span class="atn">value</span><span class="pun">=</span><span class="atv">"{{lat}}"</span><span class="pln"> </span><span class="tag">/&gt;</span><span class="pln">
+  </span><span class="tag">&lt;/p&gt;</span><span class="pln">
+  </span><span class="tag">&lt;p&gt;</span><span class="pln">
+    </span><span class="tag">&lt;label</span><span class="pln"> </span><span class="atn">for</span><span class="pun">=</span><span class="atv">"marker_{{index}}_lng"</span><span class="tag">&gt;</span><span class="pln">Longitude:</span><span class="tag">&lt;/label&gt;</span><span class="pln">
+    </span><span class="tag">&lt;input</span><span class="pln"> </span><span class="atn">type</span><span class="pun">=</span><span class="atv">"text"</span><span class="pln"> </span><span class="atn">id</span><span class="pun">=</span><span class="atv">"marker_{{index}}_lng"</span><span class="pln"> </span><span class="atn">value</span><span class="pun">=</span><span class="atv">"{{lng}}"</span><span class="pln"> </span><span class="tag">/&gt;</span><span class="pln">
+  </span><span class="tag">&lt;/p&gt;</span><span class="pln">
+  </span><span class="tag">&lt;input</span><span class="pln"> </span><span class="atn">type</span><span class="pun">=</span><span class="atv">"submit"</span><span class="pln"> </span><span class="atn">value</span><span class="pun">=</span><span class="atv">"Update position"</span><span class="pln"> </span><span class="tag">/&gt;</span><span class="pln">
+</span><span class="tag">&lt;/form&gt;</span><span class="pln">
+        </span></pre>
+      </div>
+    </div>
+  </div>
+  <script type="text/html" id="edit_marker_template">
+    <h4>Edit Marker</h4>
+    <form class="edit_marker" action="#" method="post" data-marker-index="{{index}}">
+      <p>
+        <label for="marker_{{index}}_lat">Latitude:</label>
+        <input type="text" id="marker_{{index}}_lat" value="{{lat}}" />
+      </p>
+      <p>
+        <label for="marker_{{index}}_lng">Longitude:</label>
+        <input type="text" id="marker_{{index}}_lng" value="{{lng}}" />
+      </p>
+      <input type="submit" value="Update position" />
+    </form>
+  </script>
+
+
+</body></html>
